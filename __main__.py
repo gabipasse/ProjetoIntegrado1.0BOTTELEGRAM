@@ -2,7 +2,7 @@ import os
 
 import telebot
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN = "6277999510:AAHY3oNU1EdZeNb6rabY9cDgvqYPXZVk7CU"
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -14,7 +14,7 @@ from PIL import Image
 
 from pillow_heif import register_heif_opener
 
-conn = os.environ.get("MONGODB_CONN")
+conn = "mongodb+srv://bekoitoAdmin:JmOE7OMbwnZ6fDnU@cluster0.xqmickq.mongodb.net/?retryWrites=true&w=majority"
 
 client = pymongo.MongoClient(conn, server_api=ServerApi('1'))
 
@@ -24,7 +24,13 @@ CarbonFree = client.CarbonFree
 def get_exif(filename):
     image = Image.open(filename)
 
-    image.save(filename.replace(".heic", ".jpg"), 'JPEG')
+    if ".HEIC" in filename:
+
+        image.save(filename.replace(".HEIC", ".jpg"), 'JPEG')
+
+    else:
+
+        image.save(filename.replace(".heic", ".JPG"), 'JPEG')
 
     image.verify()
 
@@ -32,7 +38,6 @@ def get_exif(filename):
 
 
 def get_geotagging(exif):
-
     geo_tagging_info = {}
 
     if not exif:
@@ -42,7 +47,12 @@ def get_geotagging(exif):
 
         gps_keys = ['GPSLatitudeRef', 'GPSLatitude', 'GPSLongitudeRef', 'GPSLongitude']
 
+        i = 0
+
         for k, v in exif.items():
+
+            if i == 4:
+                break
 
             if type(v) == tuple:
 
@@ -53,7 +63,9 @@ def get_geotagging(exif):
 
                 v = myList
 
-            geo_tagging_info[gps_keys[k - 1]] = v
+                geo_tagging_info[gps_keys[k - 1]] = v
+
+                i += 1
 
         return geo_tagging_info
 
@@ -67,6 +79,7 @@ def send_welcome(message):
 @bot.message_handler(commands=["usuarios"])  # filtros
 def usuarios(message):
 
+    bot.reply_to(message, "Enviando os dados")
 
     for usuarioDado in CarbonFree.UsuariosQR.find({}):  # separar a chave da imagem
 
@@ -78,11 +91,11 @@ def usuarios(message):
 @bot.message_handler(commands=["areas"])
 def areas(message):
 
+    bot.reply_to(message, "Enviando os dados:")
 
     for areaDado in CarbonFree.VistoriaDados.find({}):
 
         for key, value in areaDado["geoData"].items():
-
             bot.reply_to(message, str(value))
 
         image = areaDado["pathJPG"]
@@ -95,12 +108,13 @@ def areas(message):
 @bot.message_handler(content_types=['document'])
 def handle_document(message):
 
+    bot.reply_to(message, "Verificando imagem e dados!")
+
     file_info = bot.get_file(message.document.file_id)
 
     file_name = message.document.file_name
 
     if not file_name.lower().endswith(".heic"):
-
         bot.reply_to(message, "Envie apenas arquivos/imagens como documento heic.")
 
         return
@@ -135,7 +149,7 @@ def handle_document(message):
 
         "pathHeic": message.document.file_name,
 
-        "pathJPG": message.document.file_name.replace(".heic", ".jpg"),
+        "pathJPG": message.document.file_name.replace(".HEIC", ".jpg"),
 
         "autor": message.chat.id
 
@@ -144,7 +158,6 @@ def handle_document(message):
     bot.reply_to(message, "Foto inserida com sucesso!")
 
     if not usuario:
-
         CarbonFree.UsuariosQR.insert_one({
 
             "_id": message.chat.id,
@@ -161,5 +174,4 @@ def handle_document(message):
 
 
 if __name__ == "__main__":
-
     bot.infinity_polling()
