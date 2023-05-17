@@ -149,7 +149,7 @@ def handle_document(message):
 
         "pathHeic": message.document.file_name,
 
-        "pathJPG": message.document.file_name.replace(".HEIC", ".jpg"),
+        "pathJPG": message.document.file_name.lower().replace(".heic", ".jpg"),
 
         "autor": message.chat.id
 
