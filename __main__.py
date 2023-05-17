@@ -2,7 +2,7 @@ import os
 
 import telebot
 
-BOT_TOKEN = "6277999510:AAHY3oNU1EdZeNb6rabY9cDgvqYPXZVk7CU"
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -14,7 +14,7 @@ from PIL import Image
 
 from pillow_heif import register_heif_opener
 
-conn = "mongodb+srv://bekoitoAdmin:JmOE7OMbwnZ6fDnU@cluster0.xqmickq.mongodb.net/?retryWrites=true&w=majority"
+conn = os.environ.get('MONGODB_CONN')
 
 client = pymongo.MongoClient(conn, server_api=ServerApi('1'))
 
