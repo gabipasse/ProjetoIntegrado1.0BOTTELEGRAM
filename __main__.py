@@ -73,13 +73,13 @@ def get_geotagging(exif):
 @bot.message_handler(commands=["comandos"])
 def send_welcome(message):
     bot.reply_to(message,
-                 "Digite /usuarios para acessar informacoes dos usuarios, /areas para acessar informacoes das areas ou envie uma imagem como documento heic para armazena-la!")
+                 "Envie uma imagem em formato .heic para armazená-la ou utilize os comandos /usuarios e /areas para acessar as informações")
 
 
 @bot.message_handler(commands=["usuarios"])  # filtros
 def usuarios(message):
 
-    bot.reply_to(message, "Enviando os dados")
+    bot.reply_to(message, "Enviando dados...")
 
     for usuarioDado in CarbonFree.UsuariosQR.find({}):  # separar a chave da imagem
 
@@ -91,7 +91,7 @@ def usuarios(message):
 @bot.message_handler(commands=["areas"])
 def areas(message):
 
-    bot.reply_to(message, "Enviando os dados:")
+    bot.reply_to(message, "Enviando dados...")
 
     for areaDado in CarbonFree.VistoriaDados.find({}):
 
@@ -108,14 +108,14 @@ def areas(message):
 @bot.message_handler(content_types=['document'])
 def handle_document(message):
 
-    bot.reply_to(message, "Verificando imagem e dados!")
+    bot.reply_to(message, "Verificando imagem...")
 
     file_info = bot.get_file(message.document.file_id)
 
     file_name = message.document.file_name
 
     if not file_name.lower().endswith(".heic"):
-        bot.reply_to(message, "Envie apenas arquivos/imagens como documento heic.")
+        bot.reply_to(message, "Apenas imagens em formato .heic são suportadas no momento.")
 
         return
 
@@ -129,7 +129,7 @@ def handle_document(message):
     if len(usuario) > 1:
         bot.reply_to(message, "Erro ao realizar operação.")
 
-        raise ValueError("Dois usuarios com mesmo id presentes no banco de dados!")
+        raise ValueError("Dois usuários possuem o mesmo ID no banco de dados.")
 
     with open(message.document.file_name, "wb") as f:
 
@@ -155,7 +155,7 @@ def handle_document(message):
 
     })
 
-    bot.reply_to(message, "Foto inserida com sucesso!")
+    bot.reply_to(message, "Imagem inserida com sucesso!")
 
     if not usuario:
         CarbonFree.UsuariosQR.insert_one({
@@ -170,7 +170,7 @@ def handle_document(message):
 
         })
 
-        bot.reply_to(message, "Seja bem vindo!")
+        bot.reply_to(message, "Seja bem-vindo(a)!")
 
 
 if __name__ == "__main__":
